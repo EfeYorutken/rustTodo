@@ -68,7 +68,7 @@ fn add_to_vec_with_check(todos : &mut Vec<String>,new_item : String){
 }
 
 fn main() {
-    let path = String::from("Path\\To\\Your\\Todo\\list");
+    let path = String::from("Path/to/todo/file");
 
     let args : Vec<String> = env::args().collect();
 
@@ -82,7 +82,6 @@ fn main() {
     };
     let rest = vec_to_string(&args,1);
 
-    println!("{}",rest);
     let content = fs::read_to_string(path.clone()).expect("no such file exists");
     let mut todos = split(&content,'\n');
 
@@ -98,7 +97,8 @@ fn main() {
         },
         "-r" =>{
             let index : usize = split(&rest,' ')[1].parse::<usize>().unwrap();
-            todos.remove(index);
+            println!("index is {}",index);
+            todos.swap_remove(index);
             write_todo_to_file(path,todos);
         }
         _ => {
