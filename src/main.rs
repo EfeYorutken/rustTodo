@@ -55,12 +55,14 @@ fn strike_out(list : &mut Vec<String>,index : usize){
 }
 
 fn write_todo_to_file(path : String, todos : Vec<String>){
-    let mut file = fs::OpenOptions::new().write(true).open(path).expect("cant open file");
+    let mut file = fs::OpenOptions::new().write(true).truncate(true).open(path).expect("cant open file");
     let mut new_content = String::new();
     for i in todos {
-        new_content += &format!("{}\n",i).to_string();
+        if i.len() != 0{
+            new_content += &format!("{}\n",i).to_string();
+        }
     }
-    file.write(new_content.as_bytes()).expect("cant write to file");
+    file.write_all(new_content.as_bytes()).expect("cant write to file");
 }
 
 fn add_to_vec_with_check(todos : &mut Vec<String>,new_item : String){
@@ -68,7 +70,7 @@ fn add_to_vec_with_check(todos : &mut Vec<String>,new_item : String){
 }
 
 fn main() {
-    let path = String::from("Path/to/todo/file");
+    let path = String::from("C:\\Users\\user\\Desktop\\volt\\todo.md");
 
     let args : Vec<String> = env::args().collect();
 
@@ -80,14 +82,17 @@ fn main() {
             ""
         }
     };
-    let rest = vec_to_string(&args,1);
+    let rest = vec_to_string(&args,2);
 
     let content = fs::read_to_string(path.clone()).expect("no such file exists");
     let mut todos = split(&content,'\n');
 
     match command{
         "-s" => {
-            let index : usize = split(&rest,' ')[1].parse::<usize>().unwrap();
+            let index = match split(&rest,' ')[0].parse::<usize>(){
+                Ok(v) => v,
+                Err(_)=> panic!()
+            };
             strike_out(&mut todos,index as usize);
             write_todo_to_file(path,todos);
         },
@@ -96,8 +101,10 @@ fn main() {
             write_todo_to_file(path,todos);
         },
         "-r" =>{
-            let index : usize = split(&rest,' ')[1].parse::<usize>().unwrap();
-            println!("index is {}",index);
+            let index = match split(&rest,' ')[0].parse::<usize>(){
+                Ok(v) => v,
+                Err(_)=> panic!()
+            };
             todos.swap_remove(index);
             write_todo_to_file(path,todos);
         }
